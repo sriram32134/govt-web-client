@@ -1,0 +1,122 @@
+.dashboard-container {
+  min-height: 100vh;
+  background-color: #f4f6f8;
+  padding: 20px;
+  font-family: "Segoe UI", Tahoma, sans-serif;
+}
+
+
+.dashboard-header {
+  background: linear-gradient(135deg, #1976d2, #1e88e5);
+  color: white;
+  padding: 20px;
+  border-radius: 10px;
+  margin-bottom: 25px;
+}
+
+.dashboard-header h1 {
+  margin: 0;
+  font-size: 26px;
+}
+
+.dashboard-header p {
+  margin-top: 6px;
+  font-size: 14px;
+  opacity: 0.9;
+}
+
+.filter-section {
+  background-color: white;
+  padding: 15px 20px;
+  border-radius: 10px;
+  margin-bottom: 20px;
+  display: flex;
+  align-items: center;
+  gap: 15px;
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.08);
+}
+
+.filter-section label {
+  font-weight: 600;
+}
+
+.filter-section select {
+  padding: 8px 12px;
+  border-radius: 6px;
+  border: 1px solid #ccc;
+  font-size: 14px;
+  outline: none;
+}
+
+.filter-section select:focus {
+  border-color: #1e88e5;
+}
+
+.table-section {
+  background-color: white;
+  border-radius: 10px;
+  padding: 10px;
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.08);
+}
+
+table {
+  width: 100%;
+  border-collapse: collapse;
+}
+
+thead {
+  background-color: #eeeeee;
+}
+
+th,
+td {
+  padding: 12px;
+  text-align: left;
+  font-size: 14px;
+}
+
+th {
+  color: #333;
+}
+
+tbody tr:hover {
+  background-color: #f1f7ff;
+}
+
+.status-approved {
+  color: green;
+  font-weight: 600;
+}
+
+.status-rejected {
+  color: red;
+  font-weight: 600;
+}
+
+.status-pending {
+  color: #555;
+}
+
+button {
+  padding: 6px 14px;
+  border-radius: 6px;
+  border: none;
+  font-size: 13px;
+  cursor: pointer;
+}
+
+button:disabled {
+  opacity: 0.6;
+  cursor: not-allowed;
+}
+
+button:first-child {
+  background-color: #2e7d32;
+  color: white;
+  margin-right: 6px;
+}
+
+button:last-child {
+  background-color: #c62828;
+  color: white;
+}

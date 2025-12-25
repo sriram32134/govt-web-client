@@ -14,8 +14,10 @@ function VroLogin({onLogin}){
     onLogin();
 }
     return(
+     <div className="login-page">
         <div className="login-container">
             <h2>VRO  login</h2>
+            <p className="login-subtitle">Admin Access – VRO Only</p>
             <form onSubmit={handleSubmit}>
                 <input type="text" 
                      placeholder ="Username or Email"
@@ -36,6 +38,7 @@ function VroLogin({onLogin}){
                 </form>
 
         </div>
+    </div>
     );
 }
 
