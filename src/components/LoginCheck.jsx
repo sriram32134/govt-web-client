@@ -3,7 +3,7 @@ import VroLogin from './pages/VroLogin.jsx';
 import AdminDashboard from './pages/AdminDashboard.jsx'
 import './App.css'
 
-function All() {
+function LoginCheck() {
   const[isLoggedin,setIsLoggedIn] = useState(false);
   return(
     <>
@@ -12,5 +12,5 @@ function All() {
     </>
   )
 }
-export default All
+export default LoginCheck
 

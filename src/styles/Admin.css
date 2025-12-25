@@ -7,12 +7,13 @@
 
 
 .dashboard-header {
-  background: linear-gradient(135deg, #1976d2, #1e88e5);
+  background: #1c5a9a;
   color: white;
   padding: 20px;
   border-radius: 10px;
   margin-bottom: 25px;
 }
+
 
 .dashboard-header h1 {
   margin: 0;
@@ -111,12 +112,54 @@ button:disabled {
 }
 
 button:first-child {
-  background-color: #2e7d32;
+  background-color: #0b3c5d;
   color: white;
   margin-right: 6px;
 }
 
 button:last-child {
-  background-color: #c62828;
+  background-color: #000000;
   color: white;
 }
+.modal-overlay {
+  position: fixed;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 100%;
+  background: rgba(0, 0, 0, 0.5);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  z-index: 1000;
+}
+
+.modal-content {
+  background: white;
+  width: 500px;
+  max-width: 90%;
+  padding: 20px;
+  border-radius: 10px;
+  box-shadow: 0 10px 25px rgba(0, 0, 0, 0.3);
+}
+
+.modal-content h3 {
+  margin-bottom: 15px;
+  color: #0b3c5d;
+}
+
+.modal-content p {
+  margin: 6px 0;
+  font-size: 14px;
+}
+
+.modal-close {
+  margin-top: 15px;
+  background-color: #0b3c5d;
+  color: white;
+  border: none;
+  padding: 8px 14px;
+  border-radius: 6px;
+  cursor: pointer;
+}
+
