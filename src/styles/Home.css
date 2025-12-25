@@ -1,0 +1,41 @@
+.header-gradient {
+  background: linear-gradient(90deg, #0b3c5d, #1f5fa3);
+}
+
+.hero-section {
+  min-height: calc(100vh - 120px);
+  background: linear-gradient(180deg, #f8fbff, #e3f2fd);
+}
+
+.hero-section h1,
+.hero-section p {
+  color: #0b3c5d;
+}
+
+.nav-hover {
+  transition: all 0.3s ease;
+}
+
+.nav-hover:hover {
+  text-decoration: underline;
+  transform: translateY(-2px);
+}
+/* Primary button - Citizen Desk theme */
+.btn-primary {
+  background-color: #0b3c5d !important;
+  border-color: #0b3c5d !important;
+}
+
+.btn-primary:hover,
+.btn-primary:focus {
+  background-color: #1c5a9a !important;
+  border-color: #1c5a9a !important;
+}
+
+/* Disabled state (important for Link + button look) */
+.btn-primary.disabled,
+.btn-primary:disabled {
+  background-color: #8aa6c1 !important;
+  border-color: #8aa6c1 !important;
+  cursor: not-allowed;
+}
