@@ -34,12 +34,12 @@ function LatestNews() {
             <div className="card h-100 border-0 shadow-sm hover-shadow transition">
               <div className="card-body">
                 <div className="d-flex justify-content-between mb-2">
-                  <span className="badge bg-primary-subtle text-primary border border-primary-subtle">{news.category}</span>
+                  <span className="badge bg-white text-dark border border-dark-subtle">{news.category}</span>
                   <small className="text-muted">{news.date}</small>
                 </div>
                 <h5 className="card-title fw-bold">{news.title}</h5>
                 <p className="card-text text-secondary small">{news.description}</p>
-                <button className="btn btn-link p-0 text-decoration-none fw-bold text-navy">Read Full Document →</button>
+                <button className="btn p-2 fw-bold read-doc-btn">Read Full Document →</button>
               </div>
             </div>
           </div>
