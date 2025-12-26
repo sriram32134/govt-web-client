@@ -1,27 +1,23 @@
 import { Routes, Route } from "react-router-dom";
 import Home from "./pages/Home";
 import District from "./components/Home/District";
-import Mobile from "./components/Home/Mobile";
 import History from "./components/Home/ComplaintsHistory";
 import RaiseComplaint from "./components/Complaints/RaiseComplaint";
 import VroLogin from "./pages/VroLogin";
 import AdminDashboard from "./pages/AdminDashboard";
-
-
-
+import LatestNews from "./pages/LatestNews";
 
 function App() {
   return (
     <Routes>
-      <Route element={<Home />}>
-        <Route path="/" element={<District />} />
-        <Route path="/mobile" element={<Mobile />} />
-        <Route path="/history" element={<History/>}/>
-        <Route path="/raise-complaint" element={<RaiseComplaint />} />
-        <Route path="/admin-login" element={<VroLogin/>}/>
-        <Route path="/admin-dashboard" element={<AdminDashboard/>}/>
+      <Route path="/" element={<Home />}>
+        <Route index element={<District />} />
+        <Route path="history" element={<History />} />
+        <Route path="raise-complaint" element={<RaiseComplaint />} />
+        <Route path="latest-news" element={<LatestNews />} />
+        <Route path="admin-login" element={<VroLogin />} />
+        <Route path="admin-dashboard" element={<AdminDashboard />} />
       </Route>
-      
     </Routes>
   );
 }
