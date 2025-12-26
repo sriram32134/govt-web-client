@@ -1,6 +1,6 @@
 import React, { useState } from "react";
 import { Link } from "react-router-dom";
-import "../../styles/home.css";
+import "../../styles/Home.css";
 
 function District() {
   const districts = [
