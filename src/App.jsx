@@ -3,7 +3,6 @@ import Home from "./pages/Home";
 import District from "./components/Home/District";
 import History from "./components/Home/ComplaintsHistory";
 import RaiseComplaint from "./components/Complaints/RaiseComplaint";
-import VroLogin from "./pages/VroLogin";
 import AdminDashboard from "./pages/AdminDashboard";
 import LatestNews from "./pages/LatestNews";
 
@@ -15,7 +14,6 @@ function App() {
         <Route path="history" element={<History />} />
         <Route path="raise-complaint" element={<RaiseComplaint />} />
         <Route path="latest-news" element={<LatestNews />} />
-        <Route path="admin-login" element={<VroLogin />} />
         <Route path="admin-dashboard" element={<AdminDashboard />} />
       </Route>
     </Routes>

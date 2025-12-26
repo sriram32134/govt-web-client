@@ -97,7 +97,7 @@ function RaiseComplaint() {
   return (
     <main className="hero-section py-5">
       <div className="container">
-        <h2 className="fw-bold text-center mb-4">Raise a Complaint</h2>
+        <h2 className="fw-bold text-center mb-4"style={{color:"#0D2C50"}}>Raise a Complaint</h2>
 
         <form className="row g-3" onSubmit={handleSubmit}>
           <div className="col-md-6">
