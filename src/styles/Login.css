@@ -14,18 +14,21 @@
 /* =========================
    LOGIN CARD
    ========================= */
+/* =========================
+   LOGIN CONTAINER
+   ========================= */
 .login-container {
-  position: relative;               /* anchor for close button */
+  position: relative;
   background-color: #ffffff;
   width: 360px;
-  padding: 34px 25px 28px;           /* extra top padding for close button */
+  padding: 34px 25px 28px;
   border-radius: 12px;
   box-shadow: 0 12px 30px rgba(0, 0, 0, 0.25);
   text-align: center;
 }
 
 /* =========================
-   CLOSE BUTTON
+   CLOSE BUTTON (FOOTER STYLE)
    ========================= */
 .close-btn {
   position: absolute;
@@ -33,14 +36,17 @@
   right: 12px;
   background: transparent;
   border: none;
-  font-size: 18px;
-  cursor: pointer;
+  font-size: 1.2rem;
+  font-weight: bold;
   line-height: 1;
-  color: rgb(68, 68, 68);
+  cursor: pointer;
+  color: #ffffff;                 /* WHITE like footer icons */
+  transition: all 0.25s ease;
 }
 
 .close-btn:hover {
-  color: #000;
+  color: #ff9933;                 /* SAME orange as footer hover */
+  transform: translateY(-1px);
 }
 
 /* =========================
