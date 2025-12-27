@@ -1,11 +1,11 @@
-import React, { useState, useRef } from "react";
+import React, { useState } from "react";
+import { IKContext, IKUpload } from "imagekitio-react";
+import { locationData } from "../../data/locations";
 
 const primary = "#0b3c5d";
-const primaryHover = "#1c5a9a";
 
 function RaiseComplaint() {
-  const [hoverBtn, setHoverBtn] = useState(null);
-
+  const [loading, setLoading] = useState(false);
   const [formData, setFormData] = useState({
     name: "",
     mobile: "",
@@ -15,257 +15,130 @@ function RaiseComplaint() {
     description: "",
   });
 
-  const [image, setImage] = useState(null);
-  const [preview, setPreview] = useState(null);
+  const [otp, setOtp] = useState("");
+  const [isOtpSent, setIsOtpSent] = useState(false);
+  const [isVerified, setIsVerified] = useState(false);
+  const [uploadedImageUrl, setUploadedImageUrl] = useState("");
   const [location, setLocation] = useState(null);
   const [locationError, setLocationError] = useState("");
 
-  const cameraInputRef = useRef(null);
-  const fileInputRef = useRef(null);
+  const handleChange = (e) => setFormData({ ...formData, [e.target.name]: e.target.value });
 
-  const handleChange = (e) => {
-    setFormData({ ...formData, [e.target.name]: e.target.value });
+  const handleDistrictChange = (e) => {
+    setFormData({ ...formData, district: e.target.value, mandal: "" }); // Reset mandal on district change
   };
 
-  const handleImage = (e) => {
-    const file = e.target.files[0];
-    if (!file) return;
-    setImage(file);
-    setPreview(URL.createObjectURL(file));
+  const handleSendOtp = async () => {
+    if (formData.mobile.length !== 10) return alert("Enter valid 10-digit mobile");
+    await fetch("http://localhost:5000/api/auth/send-otp", {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({ mobile: formData.mobile }),
+    });
+    setIsOtpSent(true);
+    alert("OTP sent");
+  };
+
+  const handleVerifyOtp = async () => {
+    const res = await fetch("http://localhost:5000/api/auth/verify-otp", {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({ mobile: formData.mobile, otp }),
+    });
+    const data = await res.json();
+    if (data.success) { setIsVerified(true); alert("Verified"); } 
+    else alert("Invalid OTP");
   };
 
   const getLocation = () => {
-  if (!("geolocation" in navigator)) {
-    alert("Geolocation not supported");
-    return;
-  }
-
-  navigator.geolocation.getCurrentPosition(
-    (position) => {
-      console.log("SUCCESS", position);
-
-      setLocation({
-        lat: position.coords.latitude,
-        lng: position.coords.longitude,
-      });
-
-      setLocationError("");
-    },
-    (error) => {
-      console.error("ERROR", error);
-
-      switch (error.code) {
-        case error.PERMISSION_DENIED:
-          setLocationError("Permission denied");
-          break;
-        case error.POSITION_UNAVAILABLE:
-          setLocationError("Position unavailable");
-          break;
-        case error.TIMEOUT:
-          setLocationError("Request timeout");
-          break;
-        default:
-          setLocationError("Unknown error");
-      }
-    },
-    {
-      enableHighAccuracy: true,
-      timeout: 15000,
-      maximumAge: 0,
-    }
-  );
-};
-
-  const handleSubmit = (e) => {
-    e.preventDefault();
-    console.log({ ...formData, image, location });
-    alert("Complaint raised successfully");
+    navigator.geolocation.getCurrentPosition(
+      (pos) => setLocation({ lat: pos.coords.latitude, lng: pos.coords.longitude }),
+      () => setLocationError("Location permission denied")
+    );
   };
 
-  const outlineStyle = (id) => ({
-    color: hoverBtn === id ? "#fff" : primary,
-    border: `1px solid ${hoverBtn === id ? primaryHover : primary}`,
-    backgroundColor: hoverBtn === id ? primaryHover : "transparent",
-  });
+  const handleSubmit = async (e) => {
+    e.preventDefault();
+    if (!isVerified) return alert("Verify mobile first");
+    if (!uploadedImageUrl) return alert("Upload image first");
+    if (!location) return alert("Capture location first");
 
-  const solidStyle = {
-    backgroundColor: primary,
-    border: `1px solid ${primary}`,
-    color: "#fff",
+    setLoading(true);
+    try {
+      const res = await fetch("http://localhost:5000/api/complaints/raise", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ ...formData, imageUrl: uploadedImageUrl, location }),
+      });
+      const result = await res.json();
+      if (result.success) { alert("Submitted successfully"); window.location.reload(); }
+    } catch { alert("Server error"); } 
+    finally { setLoading(false); }
   };
 
   return (
     <main className="hero-section py-5">
       <div className="container">
-        <h2 className="fw-bold text-center mb-4"style={{color:"#0D2C50"}}>Raise a Complaint</h2>
-
+        <h2 className="fw-bold text-center mb-4" style={{ color: "#0D2C50" }}>Raise a Complaint</h2>
         <form className="row g-3" onSubmit={handleSubmit}>
+          
           <div className="col-md-6">
-            <input
-              type="text"
-              name="name"
-              className="form-control form-control-lg"
-              placeholder="Your Name"
-              value={formData.name}
-              onChange={handleChange}
-              required
-            />
+            <input type="text" name="name" className="form-control form-control-lg" placeholder="Your Name" value={formData.name} onChange={handleChange} required />
           </div>
 
           <div className="col-md-6">
-            <input
-              type="tel"
-              name="mobile"
-              maxLength="10"
-              className="form-control form-control-lg"
-              placeholder="Mobile Number"
-              value={formData.mobile}
-              onChange={handleChange}
-              required
-            />
+            <div className="input-group input-group-lg">
+              <input type="tel" name="mobile" className="form-control" placeholder="Mobile Number" value={formData.mobile} onChange={handleChange} maxLength="10" disabled={isVerified} required />
+              {!isVerified && (
+                <button type="button" className="btn btn-primary" style={{ backgroundColor: primary }} onClick={isOtpSent ? handleVerifyOtp : handleSendOtp}>
+                  {isOtpSent ? "Verify OTP" : "Send OTP"}
+                </button>
+              )}
+            </div>
+            {isOtpSent && !isVerified && <input type="text" className="form-control mt-2" placeholder="Enter OTP" value={otp} onChange={(e) => setOtp(e.target.value)} />}
           </div>
 
           <div className="col-md-4">
-            <select
-              name="district"
-              className="form-select form-select-lg"
-              value={formData.district}
-              onChange={handleChange}
-              required
-            >
+            <select name="district" className="form-select form-select-lg" value={formData.district} onChange={handleDistrictChange} required>
               <option value="">Select District</option>
-              <option>Visakhapatnam</option>
-              <option>Guntur</option>
-              <option>Krishna</option>
+              {Object.keys(locationData).map(d => <option key={d} value={d}>{d}</option>)}
             </select>
           </div>
 
           <div className="col-md-4">
-            <select
-              name="mandal"
-              className="form-select form-select-lg"
-              value={formData.mandal}
-              onChange={handleChange}
-              required
-            >
+            <select name="mandal" className="form-select form-select-lg" value={formData.mandal} onChange={handleChange} required disabled={!formData.district}>
               <option value="">Select Mandal</option>
-              <option>Mandal 1</option>
-              <option>Mandal 2</option>
+              {formData.district && locationData[formData.district].map(m => <option key={m} value={m}>{m}</option>)}
             </select>
           </div>
 
           <div className="col-md-4">
-            <select
-              name="village"
-              className="form-select form-select-lg"
-              value={formData.village}
-              onChange={handleChange}
-              required
-            >
-              <option value="">Select Village</option>
-              <option>Village A</option>
-              <option>Village B</option>
-            </select>
+            <input type="text" name="village" className="form-control form-control-lg" placeholder="Village Name" value={formData.village} onChange={handleChange} required />
           </div>
 
           <div className="col-12">
-            <textarea
-              name="description"
-              rows="4"
-              className="form-control form-control-lg"
-              placeholder="Describe your problem"
-              value={formData.description}
-              onChange={handleChange}
-              required
-            />
+            <textarea name="description" rows="4" className="form-control form-control-lg" placeholder="Describe your problem" value={formData.description} onChange={handleChange} required />
           </div>
 
           <div className="col-12">
-            <div className="d-flex gap-2">
-              <button
-                type="button"
-                className="btn"
-                style={outlineStyle("camera")}
-                onMouseEnter={() => setHoverBtn("camera")}
-                onMouseLeave={() => setHoverBtn(null)}
-                onClick={() => cameraInputRef.current.click()}
-              >
-                Open Camera
-              </button>
-
-              <button
-                type="button"
-                className="btn"
-                style={outlineStyle("file")}
-                onMouseEnter={() => setHoverBtn("file")}
-                onMouseLeave={() => setHoverBtn(null)}
-                onClick={() => fileInputRef.current.click()}
-              >
-                Choose File
-              </button>
-            </div>
-
-            <input
-              type="file"
-              accept="image/*"
-              capture="environment"
-              ref={cameraInputRef}
-              className="d-none"
-              onChange={handleImage}
-            />
-
-            <input
-              type="file"
-              accept="image/*"
-              ref={fileInputRef}
-              className="d-none"
-              onChange={handleImage}
-            />
+            <IKContext publicKey={import.meta.env.VITE_IK_PUBLIC_KEY} urlEndpoint={import.meta.env.VITE_IK_URL_ENDPOINT} 
+              authenticator={async () => {
+                const res = await fetch("http://localhost:5000/api/auth/ik-auth");
+                return await res.json();
+              }}>
+              <IKUpload fileName="complaint.jpg" useUniqueFileName className="form-control" onSuccess={(res) => setUploadedImageUrl(res.url)} onError={() => alert("Upload failed")} />
+            </IKContext>
           </div>
 
-          {preview && (
-            <div className="col-12 text-center mt-3">
-              <img
-                src={preview}
-                alt="Preview"
-                className="img-fluid rounded shadow"
-                style={{ maxHeight: "250px" }}
-              />
-            </div>
-          )}
-
-                    <div className="col-12 mt-2">
-            <button
-              type="button"
-              disabled={!!location}
-              className="btn"
-              style={outlineStyle("location")}
-              onMouseEnter={() => setHoverBtn("location")}
-              onMouseLeave={() => setHoverBtn(null)}
-              onClick={getLocation}
-            >
+          <div className="col-12">
+            <button type="button" className={`btn ${location ? 'btn-success' : 'btn-outline-primary'}`} onClick={getLocation}>
               {location ? "Location Captured ✓" : "Get Current Location"}
             </button>
-
-            {location && (
-              <div className="mt-2 p-2 rounded" style={{ border: `1px solid ${primary}` }}>
-                <small>
-                  Latitude: {location.lat}
-                  <br />
-                  Longitude: {location.lng}
-                </small>
-              </div>
-            )}
-
-            {locationError && (
-              <p className="mt-2 small text-danger">{locationError}</p>
-            )}
           </div>
 
-
           <div className="col-12 d-grid mt-3">
-            <button type="submit" className="btn btn-lg" style={solidStyle}>
-              Raise Complaint
+            <button type="submit" className="btn btn-lg text-white" style={{ backgroundColor: primary }} disabled={loading}>
+              {loading ? "Submitting..." : "Raise Complaint"}
             </button>
           </div>
         </form>

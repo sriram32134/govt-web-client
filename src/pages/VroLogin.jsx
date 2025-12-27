@@ -1,70 +1,58 @@
 import React, { useState } from "react";
 import { useNavigate } from "react-router-dom";
+import API from "../api/axios"; // Ensure you import your axios instance
 import "../styles/Login.css";
 
 function VroLogin({ onLogin, onClose }) {
-  const [userName, setUserName] = useState("");
+  const [officerId, setOfficerId] = useState("");
   const [password, setPassword] = useState("");
   const [error, setError] = useState("");
-
   const navigate = useNavigate();
 
-  const handleSubmit = (e) => {
+  const handleSubmit = async (e) => {
     e.preventDefault();
+    setError("");
 
-    const trimmedUser = userName.trim();
-    const trimmedPass = password.trim();
+    try {
+      const res = await API.post("/officer/login", { 
+        officerId: officerId.trim(), 
+        password: password.trim() 
+      });
 
-    if (!trimmedUser || !trimmedPass) {
-      setError("Please Enter Both Username & Password");
-      return;
-    }
-
-    if (trimmedUser === "admin" && trimmedPass === "admin123") {
-      setError("");
-      onLogin?.();
-      onClose?.();
-      navigate("/admin-dashboard");
-    } else {
-      setError("Invalid username or password");
+      if (res.data.success) {
+        // Store officer info in localStorage to keep session alive
+        localStorage.setItem("officer", JSON.stringify(res.data.officer));
+        
+        onLogin?.();
+        onClose?.();
+        navigate("/admin-dashboard");
+      }
+    } catch (err) {
+      setError(err.response?.data?.message || "Login Failed");
     }
   };
 
   return (
-    /* ❌ login-page REMOVED */
     <div className="login-container">
-      <button
-        type="button"
-        className="close-btn"
-        onClick={onClose}
-        aria-label="Close login popup"
-      >
-        ✖
-      </button>
-
-      <h2>VRO Login</h2>
-      <p className="login-subtitle">Admin Access – VRO Only</p>
+      <button className="close-btn" onClick={onClose}>✖</button>
+      <h2>Officer Login</h2>
+      <p className="login-subtitle">Access authorized for VRO only</p>
 
       <form onSubmit={handleSubmit}>
         <input
           type="text"
-          placeholder="Username or Email"
-          value={userName}
-          onChange={(e) => setUserName(e.target.value.trimStart())}
+          placeholder="Officer ID (e.g., 23331A05I3)"
+          value={officerId}
+          onChange={(e) => setOfficerId(e.target.value)}
         />
-
         <input
           type="password"
           placeholder="Password"
           value={password}
-          onChange={(e) => setPassword(e.target.value.trimStart())}
+          onChange={(e) => setPassword(e.target.value)}
         />
-
-        {error && <p className="error">{error}</p>}
-
-        <button type="submit" className="btn-login">
-          Login
-        </button>
+        {error && <p className="error text-danger">{error}</p>}
+        <button type="submit" className="btn-login">Login</button>
       </form>
     </div>
   );

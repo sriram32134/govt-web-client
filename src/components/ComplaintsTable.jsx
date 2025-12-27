@@ -1,205 +1,134 @@
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import RejectModel from "./RejectModel";
+import API from "../api/axios";
 
-const complaintsData = [
-  {
-    id: 1,
-    title: "No drinking water",
-    village: "Gurla",
-    district: "Vizianagaram",
-    status: "pending",
-  },
-  {
-    id: 2,
-    title: "Road damaged",
-    village: "Cheepurupalli",
-    district: "Vizianagaram",
-    status: "pending",
-  },
-  {
-    id: 3,
-    title: "Street lights not working",
-    village: "Amadalavalasa",
-    district: "Srikakulam",
-    status: "pending",
-  },
-  {
-    id: 4,
-    title: "Street lights not working",
-    village: "Annavaram",
-    district: "Kakinada",
-    status: "pending",
-  },
-];
-
-function ComplaintTable({ district }) {
-  const [complaints, setComplaints] = useState(complaintsData);
-  const [showModal, setShowModal] = useState(false);
-  const [selectedId, setSelectedId] = useState(null);
+function ComplaintsTable({ district, mandal, department }) {
+  const [complaints, setComplaints] = useState([]);
+  const [showReject, setShowReject] = useState(false);
+  const [selectedComplaint, setSelectedComplaint] = useState(null);
   const [viewComplaint, setViewComplaint] = useState(null);
 
-  const filteredComplaints = complaints.filter(
-    (c) => c.district === district
-  );
+  const fetchComplaints = async () => {
+    try {
+      let query = `/officer/complaints?district=${district}&mandal=${mandal}`;
+      if (department) query += `&department=${department}`;
+      const res = await API.get(query);
+      setComplaints(res.data);
+    } catch (error) {
+      console.error("Error fetching complaints:", error);
+    }
+  };
 
-  function handleAccept(id) {
-    const updated = complaints.map((c) =>
-      c.id === id ? { ...c, status: "approved" } : c
-    );
-    setComplaints(updated);
-  }
+  useEffect(() => {
+    fetchComplaints();
+  }, [district, mandal, department]);
 
-  function handleReject(id) {
-    setSelectedId(id);
-    setShowModal(true);
-  }
+  const updateStatus = async (id, status) => {
+    await API.put(`/officer/complaints/${id}/status`, { status });
+    fetchComplaints();
+  };
 
-  function submitReject(reason) {
-    const updated = complaints.map((c) =>
-      c.id === selectedId
-        ? { ...c, status: "rejected", reason }
-        : c
-    );
-    setComplaints(updated);
-    setShowModal(false);
-  }
+  const deleteComplaint = async (id) => {
+    if (window.confirm("Permanently delete this report?")) {
+      await API.delete(`/officer/complaints/${id}`);
+      fetchComplaints();
+    }
+  };
+
+  const openReject = (complaint) => {
+    setSelectedComplaint(complaint);
+    setShowReject(true);
+  };
 
   return (
     <>
-      <table style={{ marginTop: "20px", width: "100%" }}>
-        <thead>
-          <tr>
-            <th>Title</th>
-            <th>Village</th>
-            <th>Status</th>
-            <th>Action</th>
-          </tr>
-        </thead>
-
-        <tbody>
-          {filteredComplaints.length === 0 ? (
+      <div className="table-responsive bg-white shadow-sm rounded">
+        <table className="table table-hover align-middle mb-0">
+          <thead className="table-dark">
             <tr>
-              <td colSpan="4" style={{ textAlign: "center" }}>
-                No complaints found
-              </td>
+              <th>Village</th>
+              <th>Description</th>
+              <th>Dept</th>
+              <th>Status</th>
+              <th className="text-center">Actions</th>
             </tr>
-          ) : (
-            filteredComplaints.map((c) => (
-              <tr
-                key={c.id}
-                onClick={() => setViewComplaint(c)}
-                style={{ cursor: "pointer" }}
-              >
-                <td>{c.title}</td>
-                <td>{c.village}</td>
-                <td>{c.status}</td>
-                <td>
-                  <button
-                    onClick={(e) => {
-                      e.stopPropagation();
-                      handleAccept(c.id);
-                    }}
-                    disabled={c.status !== "pending"}
-                  >
-                    Accept
-                  </button>
+          </thead>
+          <tbody>
+            {complaints.length === 0 ? (
+              <tr><td colSpan="5" className="text-center py-4">No reports found.</td></tr>
+            ) : (
+              complaints.map((c) => (
+                <tr key={c._id} onClick={() => setViewComplaint(c)} style={{ cursor: "pointer" }}>
+                  <td>{c.village}</td>
+                  <td className="text-truncate" style={{ maxWidth: "200px" }}>{c.description}</td>
+                  <td><span className="badge bg-info text-dark">{c.aiAnalysis?.department || "General"}</span></td>
+                  <td>
+                    <span className={`badge ${c.status === 'Pending' ? 'bg-warning text-dark' : c.status === 'Accepted' ? 'bg-primary' : c.status === 'Completed' ? 'bg-success' : 'bg-danger'}`}>
+                      {c.status}
+                    </span>
+                  </td>
+                  <td onClick={(e) => e.stopPropagation()} className="text-center">
+                    <div className="btn-group gap-2">
+                      
+                      {/* 1. INITIAL STATE (Pending) */}
+                      {c.status === "Pending" && (
+                        <>
+                          <button className="btn btn-sm btn-success" onClick={() => updateStatus(c._id, "Accepted")}>Accept</button>
+                          <button className="btn btn-sm btn-warning" onClick={() => openReject(c)}>Reject</button>
+                          <button className="btn btn-sm btn-danger" onClick={() => deleteComplaint(c._id)}>Delete</button>
+                        </>
+                      )}
 
-                  <button
-                    onClick={(e) => {
-                      e.stopPropagation();
-                      handleReject(c.id);
-                    }}
-                    disabled={c.status !== "pending"}
-                  >
-                    Reject
-                  </button>
-                </td>
-              </tr>
-            ))
-          )}
-        </tbody>
-      </table>
+                      {/* 2. ACCEPTED STATE */}
+                      {c.status === "Accepted" && (
+                        <>
+                          <button className="btn btn-sm btn-success" onClick={() => updateStatus(c._id, "Completed")}>Completed</button>
+                          <button className="btn btn-sm btn-warning" onClick={() => openReject(c)}>Reject</button>
+                        </>
+                      )}
 
-      {showModal && (
+                      {/* 3. COMPLETED STATE */}
+                      {c.status === "Completed" && (
+                        <button className="btn btn-sm btn-danger" onClick={() => deleteComplaint(c._id)}>Delete</button>
+                      )}
+
+                      {/* 4. REJECTED STATE */}
+                      {c.status === "Rejected" && (
+                        <button className="btn btn-sm btn-danger" onClick={() => deleteComplaint(c._id)}>Delete</button>
+                      )}
+
+                    </div>
+                  </td>
+                </tr>
+              ))
+            )}
+          </tbody>
+        </table>
+      </div>
+
+      {showReject && (
         <RejectModel
-          onClose={() => setShowModal(false)}
-          onSubmit={submitReject}
+          onSubmit={async (reason) => {
+            await API.put(`/officer/complaints/${selectedComplaint._id}/status`, { status: "Rejected", reason });
+            setShowReject(false);
+            fetchComplaints();
+          }}
+          onClose={() => setShowReject(false)}
         />
       )}
 
+      {/* Detail Overlay */}
       {viewComplaint && (
-        <div
-          onClick={() => setViewComplaint(null)}
-          style={{
-            position: "fixed",
-            top: 0,
-            left: 0,
-            width: "100%",
-            height: "100%",
-            backgroundColor: "rgba(0,0,0,0.6)",
-            display: "flex",
-            alignItems: "center",
-            justifyContent: "center",
-            zIndex: 9999,
-          }}
-        >
-          <div
-            onClick={(e) => e.stopPropagation()}
-            style={{
-              backgroundColor: "#ffffff",
-              width: "520px",
-              maxWidth: "90%",
-              padding: "22px",
-              borderRadius: "10px",
-              boxShadow: "0 15px 40px rgba(0,0,0,0.35)",
-            }}
-          >
-            <h3
-              style={{
-                color: "#0b3c5d",
-                marginBottom: "18px",
-                fontSize: "22px",
-              }}
-            >
-              Complaint Details
-            </h3>
-
-            <p style={{ fontSize: "16px", margin: "8px 0" }}>
-              <strong>Title:</strong> {viewComplaint.title}
-            </p>
-            <p style={{ fontSize: "16px", margin: "8px 0" }}>
-              <strong>Village:</strong> {viewComplaint.village}
-            </p>
-            <p style={{ fontSize: "16px", margin: "8px 0" }}>
-              <strong>District:</strong> {viewComplaint.district}
-            </p>
-            <p style={{ fontSize: "16px", margin: "8px 0" }}>
-              <strong>Status:</strong> {viewComplaint.status}
-            </p>
-
-            {viewComplaint.reason && (
-              <p style={{ fontSize: "16px", margin: "8px 0" }}>
-                <strong>Rejection Reason:</strong>{" "}
-                {viewComplaint.reason}
-              </p>
-            )}
-
-            <button
-              onClick={() => setViewComplaint(null)}
-              style={{
-                marginTop: "18px",
-                padding: "10px 18px",
-                borderRadius: "6px",
-                border: "none",
-                backgroundColor: "#0b3c5d",
-                color: "#ffffff",
-                fontSize: "15px",
-                fontWeight: "600",
-                cursor: "pointer",
-              }}
-            >
-              Close
-            </button>
+        <div className="modal-overlay" onClick={() => setViewComplaint(null)} style={{ position: "fixed", inset: 0, background: "rgba(0,0,0,0.7)", display: "flex", alignItems: "center", justifyContent: "center", zIndex: 1000 }}>
+          <div className="bg-white p-4 rounded" style={{ maxWidth: "500px", width: "90%" }} onClick={e => e.stopPropagation()}>
+            <h4>Complaint Details</h4>
+            <hr />
+            <p><strong>Description:</strong> {viewComplaint.description}</p>
+            <p><strong>Status:</strong> {viewComplaint.status}</p>
+            {viewComplaint.imageUrl && <img src={viewComplaint.imageUrl} className="img-fluid rounded mt-2" alt="evidence" />}
+            <div className="text-end mt-3">
+              <button className="btn btn-secondary" onClick={() => setViewComplaint(null)}>Close</button>
+            </div>
           </div>
         </div>
       )}
@@ -207,4 +136,4 @@ function ComplaintTable({ district }) {
   );
 }
 
-export default ComplaintTable;
+export default ComplaintsTable;
