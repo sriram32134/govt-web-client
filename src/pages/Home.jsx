@@ -3,11 +3,14 @@ import { Outlet, Link, useNavigate, useLocation } from "react-router-dom";
 import MobileNumberModal from "../components/Home/MobileNumberModal";
 import NewsTicker from "../components/Home/NewsTicker";
 import LoginModal from "../components/common/LoginModal";
+import FeedbackModal from "../components/common/FeedbackModal";
 import VroLogin from "./VroLogin";
 
 function Home() {
   const [showTrackPopup, setShowTrackPopup] = useState(false);
   const [showVroLogin, setShowVroLogin] = useState(false);
+  const [showFeedback, setShowFeedback] = useState(false);
+
 
   const navigate = useNavigate();
   const location = useLocation();
@@ -119,11 +122,70 @@ function Home() {
       )}
 
       {/* FOOTER */}
-      <footer className="bg-dark text-white-50 py-4 mt-auto">
-        <div className="container text-center small">
+      <footer
+        className="footer mt-auto"
+        style={{background:"linear-gradient(180deg,#0a2342 0%,#0f3057 100%)"}}  
+      >
+
+      <div className="container py-3">
+        <div className="row align-items-center text-center text-md-start gy-3">
+
+                {/* LEFT: CONTACT */}
+      <div className="col-md-4 text-white-50 small">
+        <div className="fw-semibold text-white mb-1">Contact Support</div>
+          <div>📞{" "}
+          <a href="tel:+917207085371" className="text-white-50 text-decoration-none footer-link" >
+          7207085371
+          </a>
+      </div>
+      <div>
+        ✉️{" "}
+        <a href="mailto:help@citizendesk.gov.in"  className="text-white-50 text-decoration-none footer-link">
+          help@citizendesk.gov.in
+        </a>
+      </div>
+        <div className="mt-1">
+          <span
+            className="text-decoration-underline"
+            style={{ cursor: "pointer", color: "#ff9933" }}
+            onClick={() => setShowFeedback(true)}
+          >
+            Give Feedback
+          </span>
+        </div>
+      </div>
+          {/* RIGHT: SOCIAL */}
+          <div className="col-md-4 ms-md-auto text-md-end text-center">
+            <div className="fw-semibold text-white mb-2">Follow Us</div>
+          <div className="d-flex justify-content-md-end justify-content-center gap-3">
+            <a href="https://www.facebook.com" target="_blank" rel="noreferrer" aria-label="Facebook">
+              <i className="bi bi-facebook footer-icon"></i>
+            </a>
+            <a href="https://twitter.com" target="_blank" rel="noreferrer" aria-label="Twitter">
+              <i className="bi bi-twitter-x footer-icon"></i>
+            </a>
+            <a href="https://www.youtube.com" target="_blank" rel="noreferrer" aria-label="YouTube">
+              <i className="bi bi-youtube footer-icon"></i>
+            </a>
+            <a href="https://www.instagram.com" target="_blank" rel="noreferrer" aria-label="Instagram">
+              <i className="bi bi-instagram footer-icon"></i>
+            </a>
+            <a href="https://www.linkedin.com" target="_blank" rel="noreferrer" aria-label="LinkedIn">
+              <i className="bi bi-linkedin footer-icon"></i>
+            </a>
+          </div>
+
+        </div>
+        </div>
+        <hr className="border-light opacity-25 my-3" />
+        <div className="text-center text-white-50 small">
           © 2025 Citizen Desk | Public Grievance Portal
         </div>
-      </footer>
+      </div>
+    </footer>
+        {showFeedback && (
+        <FeedbackModal onClose={() => setShowFeedback(false)} />
+        )}
     </div>
   );
 }
