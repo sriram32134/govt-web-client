@@ -103,7 +103,7 @@ function RaiseComplaint() {
             <label className="form-label fw-bold">Upload Evidence Image</label>
             <IKContext publicKey={import.meta.env.VITE_IK_PUBLIC_KEY} urlEndpoint={import.meta.env.VITE_IK_URL_ENDPOINT} 
               authenticator={async () => {
-                const res = await fetch("http://localhost:5000/api/auth/ik-auth");
+                const res = await fetch(`${import.meta.env.VITE_API_BASE_URL}/auth/ik-auth`);
                 return await res.json();
               }}>
               <IKUpload fileName="complaint.jpg" useUniqueFileName className="form-control form-control-lg" onSuccess={(res) => setUploadedImageUrl(res.url)} onError={() => alert("Upload failed")} />
