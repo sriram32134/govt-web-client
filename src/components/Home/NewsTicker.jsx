@@ -9,10 +9,25 @@ const newsItems = [
 
 function NewsTicker() {
   return (
-    <div className="bg-warning py-1 overflow-hidden position-relative border-bottom border-dark" style={{ zIndex: 999 }}>
+    <div 
+      className="py-1 overflow-hidden position-relative border-bottom" 
+      style={{ 
+        zIndex: 999, 
+        backgroundColor: "#f8f9fa", // Light gray background
+        borderColor: "#dee2e6" 
+      }}
+    >
       <div className="d-flex align-items-center">
-        <span className="bg-dark text-white px-3 fw-bold small shadow-sm z-3 py-1">LATEST</span>
-        <marquee className="m-0 py-1 fw-semibold text-dark small" scrollamount="6">
+        {/* 'LATEST' label with blue background */}
+        <span 
+          className="text-white px-3 fw-bold small shadow-sm z-3 py-1"
+          style={{ backgroundColor: "#0b3c5d" }} // Professional Blue
+        >
+          LATEST
+        </span>
+        
+        {/* Scrolling text in blue */}
+        <marquee className="m-0 py-1 fw-semibold small" scrollamount="6" style={{ color: "#0b3c5d" }}>
           {newsItems.map((item, index) => (
             <span key={index} className="mx-5">{item}</span>
           ))}
