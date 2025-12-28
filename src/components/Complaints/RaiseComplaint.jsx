@@ -19,39 +19,79 @@ function RaiseComplaint() {
     description: "",
   });
 
-  const handleChange = (e) => setFormData({ ...formData, [e.target.name]: e.target.value });
+  const handleChange = (e) =>
+    setFormData({ ...formData, [e.target.name]: e.target.value });
 
   const handleDistrictChange = (e) => {
-    setFormData({ ...formData, district: e.target.value, mandal: "" });
+    setFormData({
+      ...formData,
+      district: e.target.value,
+      mandal: "",
+    });
   };
 
   const getLocation = () => {
     navigator.geolocation.getCurrentPosition(
-      (pos) => setLocation({ lat: pos.coords.latitude, lng: pos.coords.longitude }),
+      (pos) =>
+        setLocation({
+          lat: pos.coords.latitude,
+          lng: pos.coords.longitude,
+        }),
       () => setLocationError("Location permission denied")
     );
   };
 
   const handleSubmit = async (e) => {
     e.preventDefault();
-    // Removed isVerified check
-    if (!uploadedImageUrl) return alert("Please upload an evidence image first");
-    if (!location) return alert("Please capture your current location first");
+
+    if (!uploadedImageUrl) {
+      alert("Please upload an evidence image first");
+      return;
+    }
+
+    if (!location) {
+      alert("Please capture your current location first");
+      return;
+    }
 
     setLoading(true);
+
     try {
-      const res = await fetch(`${import.meta.env.VITE_API_BASE_URL}/complaints/raise`, {
-        method: "POST",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ ...formData, imageUrl: uploadedImageUrl, location }),
-      });
+      const res = await fetch(
+        `${import.meta.env.VITE_API_BASE_URL}/complaints/raise`,
+        {
+          method: "POST",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify({
+            ...formData,
+            imageUrl: uploadedImageUrl,
+            location,
+          }),
+        }
+      );
+
       const result = await res.json();
+
       if (result.success) {
-        alert("Complaint submitted successfully!");
-        window.location.reload();
+        alert("✅ Complaint submitted successfully!");
+
+        // ✅ RESET FORM (NO PAGE RELOAD)
+        setFormData({
+          name: "",
+          mobile: "",
+          district: "",
+          mandal: "",
+          village: "",
+          description: "",
+        });
+        setUploadedImageUrl("");
+        setLocation(null);
+        setLocationError("");
+      } else {
+        alert("❌ Failed to submit complaint");
       }
-    } catch {
-      alert("Server error occurred during submission");
+    } catch (error) {
+      alert("❌ Server error occurred during submission");
     } finally {
       setLoading(false);
     }
@@ -60,66 +100,172 @@ function RaiseComplaint() {
   return (
     <main className="hero-section py-5">
       <div className="container">
-        <h2 className="fw-bold text-center mb-4" style={{ color: "#0D2C50" }}>Raise a Complaint</h2>
+        <h2
+          className="fw-bold text-center mb-4"
+          style={{ color: "#0D2C50" }}
+        >
+          Raise a Complaint
+        </h2>
+
         <form className="row g-3" onSubmit={handleSubmit}>
-          
+          {/* NAME */}
           <div className="col-md-6">
             <label className="form-label fw-bold">Your Name</label>
-            <input type="text" name="name" className="form-control form-control-lg shadow-sm" placeholder="Enter your full name" value={formData.name} onChange={handleChange} required />
+            <input
+              type="text"
+              name="name"
+              className="form-control form-control-lg shadow-sm"
+              placeholder="Enter your full name"
+              value={formData.name}
+              onChange={handleChange}
+              required
+            />
           </div>
 
+          {/* MOBILE */}
           <div className="col-md-6">
             <label className="form-label fw-bold">Mobile Number</label>
-            <input type="tel" name="mobile" className="form-control form-control-lg shadow-sm" placeholder="10-digit mobile number" value={formData.mobile} onChange={handleChange} maxLength="10" required />
+            <input
+              type="tel"
+              name="mobile"
+              className="form-control form-control-lg shadow-sm"
+              placeholder="10-digit mobile number"
+              value={formData.mobile}
+              onChange={handleChange}
+              maxLength="10"
+              required
+            />
           </div>
 
+          {/* DISTRICT */}
           <div className="col-md-4">
             <label className="form-label fw-bold">District</label>
-            <select name="district" className="form-select form-select-lg" value={formData.district} onChange={handleDistrictChange} required>
+            <select
+              name="district"
+              className="form-select form-select-lg"
+              value={formData.district}
+              onChange={handleDistrictChange}
+              required
+            >
               <option value="">Select District</option>
-              {Object.keys(locationData).map(d => <option key={d} value={d}>{d}</option>)}
+              {Object.keys(locationData).map((d) => (
+                <option key={d} value={d}>
+                  {d}
+                </option>
+              ))}
             </select>
           </div>
 
+          {/* MANDAL */}
           <div className="col-md-4">
             <label className="form-label fw-bold">Mandal</label>
-            <select name="mandal" className="form-select form-select-lg" value={formData.mandal} onChange={handleChange} required disabled={!formData.district}>
+            <select
+              name="mandal"
+              className="form-select form-select-lg"
+              value={formData.mandal}
+              onChange={handleChange}
+              required
+              disabled={!formData.district}
+            >
               <option value="">Select Mandal</option>
-              {formData.district && locationData[formData.district].map(m => <option key={m} value={m}>{m}</option>)}
+              {formData.district &&
+                locationData[formData.district].map((m) => (
+                  <option key={m} value={m}>
+                    {m}
+                  </option>
+                ))}
             </select>
           </div>
 
+          {/* VILLAGE */}
           <div className="col-md-4">
             <label className="form-label fw-bold">Village Name</label>
-            <input type="text" name="village" className="form-control form-control-lg" placeholder="Village" value={formData.village} onChange={handleChange} required />
+            <input
+              type="text"
+              name="village"
+              className="form-control form-control-lg"
+              placeholder="Village"
+              value={formData.village}
+              onChange={handleChange}
+              required
+            />
           </div>
 
+          {/* DESCRIPTION */}
           <div className="col-12">
             <label className="form-label fw-bold">Issue Description</label>
-            <textarea name="description" rows="4" className="form-control form-control-lg" placeholder="Describe the problem in detail" value={formData.description} onChange={handleChange} required />
+            <textarea
+              name="description"
+              rows="4"
+              className="form-control form-control-lg"
+              placeholder="Describe the problem in detail"
+              value={formData.description}
+              onChange={handleChange}
+              required
+            />
           </div>
 
+          {/* IMAGE UPLOAD */}
           <div className="col-12">
-            <label className="form-label fw-bold">Upload Evidence Image</label>
-            <IKContext publicKey={import.meta.env.VITE_IK_PUBLIC_KEY} urlEndpoint={import.meta.env.VITE_IK_URL_ENDPOINT} 
+            <label className="form-label fw-bold">
+              Upload Evidence Image
+            </label>
+
+            <IKContext
+              publicKey={import.meta.env.VITE_IK_PUBLIC_KEY}
+              urlEndpoint={import.meta.env.VITE_IK_URL_ENDPOINT}
               authenticator={async () => {
-                const res = await fetch(`${import.meta.env.VITE_API_BASE_URL}/auth/ik-auth`);
+                const res = await fetch(
+                  `${import.meta.env.VITE_API_BASE_URL}/auth/ik-auth`
+                );
                 return await res.json();
-              }}>
-              <IKUpload fileName="complaint.jpg" useUniqueFileName className="form-control form-control-lg" onSuccess={(res) => setUploadedImageUrl(res.url)} onError={() => alert("Upload failed")} />
+              }}
+            >
+              <IKUpload
+                fileName="complaint.jpg"
+                useUniqueFileName
+                className="form-control form-control-lg"
+                onSuccess={(res) => setUploadedImageUrl(res.url)}
+                onError={() => alert("❌ Image upload failed")}
+              />
             </IKContext>
-            {uploadedImageUrl && <small className="text-success fw-bold mt-2 d-block">Image uploaded successfully ✓</small>}
+
+            {uploadedImageUrl && (
+              <small className="text-success fw-bold mt-2 d-block">
+                Image uploaded successfully ✓
+              </small>
+            )}
           </div>
 
+          {/* LOCATION */}
           <div className="col-12">
-            <button type="button" className={`btn btn-lg w-100 ${location ? 'btn-success' : 'btn-outline-primary'}`} onClick={getLocation}>
-              {location ? "GPS Location Captured ✓" : "Capture Current Location"}
+            <button
+              type="button"
+              className={`btn btn-lg w-100 ${
+                location ? "btn-success" : "btn-outline-primary"
+              }`}
+              onClick={getLocation}
+            >
+              {location
+                ? "GPS Location Captured ✓"
+                : "Capture Current Location"}
             </button>
-            {locationError && <small className="text-danger mt-1 d-block">{locationError}</small>}
+
+            {locationError && (
+              <small className="text-danger mt-1 d-block">
+                {locationError}
+              </small>
+            )}
           </div>
 
+          {/* SUBMIT */}
           <div className="col-12 d-grid mt-4">
-            <button type="submit" className="btn btn-lg text-white shadow" style={{ backgroundColor: primary, padding: '15px' }} disabled={loading}>
+            <button
+              type="submit"
+              className="btn btn-lg text-white shadow"
+              style={{ backgroundColor: primary, padding: "15px" }}
+              disabled={loading}
+            >
               {loading ? "Processing..." : "Submit Official Complaint"}
             </button>
           </div>
