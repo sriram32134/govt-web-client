@@ -1,5 +1,5 @@
 import { useState } from "react";
-import "../styles/Admin.css"; 
+import "../styles/Admin.css";
 import ComplaintTable from "../components/ComplaintsTable";
 import FeedbackTable from "../components/common/FeedbackTable";
 import { locationData } from "../data/locations";
@@ -17,16 +17,12 @@ function AdminDashboard() {
 
   return (
     <div className="admin-wrapper bg-light min-vh-100 pb-5">
-      {/* HERO */}
+      {/* HERO — FIXED BACKGROUND */}
       <div
-        className={`dashboard-hero py-5 mb-4 ${
-          view === "feedback" ? "text-dark" : "text-white"
-        }`}
+        className="dashboard-hero py-5 mb-4 text-white"
         style={{
           background:
-            view === "feedback"
-              ? "linear-gradient(135deg, #f8f9fa 0%, #e9ecef 100%)"
-              : "linear-gradient(135deg, #0d6efd 0%, #0a2342 100%)"
+            "linear-gradient(135deg, #0d6efd 0%, #0a2342 100%)"
         }}
       >
         <div className="container text-center">
@@ -53,7 +49,7 @@ function AdminDashboard() {
             <button
               className={`btn rounded-pill px-4 fw-bold ${
                 view === "feedback"
-                  ? "btn-dark"
+                  ? "btn-dark text-white"
                   : "btn-outline-dark"
               }`}
               onClick={() => setView("feedback")}
@@ -64,6 +60,7 @@ function AdminDashboard() {
         </div>
       </div>
 
+      {/* CONTENT */}
       <div className="container">
         {view === "complaints" ? (
           <>
@@ -137,7 +134,7 @@ function AdminDashboard() {
                 />
               </>
             ) : (
-              <div className="text-center py-5 bg-white rounded-4 opacity-50">
+              <div className="text-center py-5 bg-white rounded-4 opacity-75">
                 <h5>Awaiting Selection</h5>
                 <p>Filter by location to load reports.</p>
               </div>
@@ -145,10 +142,13 @@ function AdminDashboard() {
           </>
         ) : (
           <>
-            <h4 className="fw-bold mb-3 text-dark">
-              Citizen Feedback Stream
-            </h4>
-            <FeedbackTable />
+            {/* FEEDBACK VIEW — LIGHT & READABLE */}
+            <div className="bg-white rounded-4 shadow p-4">
+              <h4 className="fw-bold mb-3 text-dark">
+                Citizen Feedback Stream
+              </h4>
+              <FeedbackTable />
+            </div>
           </>
         )}
       </div>
